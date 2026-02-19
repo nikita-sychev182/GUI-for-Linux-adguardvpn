@@ -1,4 +1,5 @@
 # AdGuard VPN GUI для Linux
+![preview](https://i.ibb.co/LdSyMV6S/Screenshot-20260219-025832.png)
 В силу того, что на данный момент у Adguardvpn нет графического интерфейса на Linux возникла идея реализации простого GUI.
 Данный интерфейс по-сути выполняет команды официальной утилиты и для его работы необходимо иметь установленный официальный пакет AdguardVPN
 (https://adguard-vpn.com/ru/linux/overview.html#how_to_install)
