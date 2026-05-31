@@ -6,16 +6,8 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 
 
 def run_cmd(cmd_args, timeout=30):
-    # Проверяем, нужно ли использовать sudo
-    cmd_str = ' '.join(cmd_args) if isinstance(cmd_args, list) else cmd_args
-    privileged_commands = ['connect', 'disconnect']
-    
-    # Если это привилегированная команда и sudo ещё не добавлен
-    if any(cmd in cmd_str for cmd in privileged_commands) and cmd_args[0] != 'sudo':
-        cmd_args = ['sudo', '-E'] + cmd_args
-    
     try:
-        proc = subprocess.run(cmd_args, stdout=subprocess.PIPE, 
+        proc = subprocess.run(cmd_args, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, text=True, timeout=timeout)
         return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
     except Exception as e:
