@@ -90,33 +90,44 @@ ui-ux_adguardvpn/
 
 ## Запуск без sudo
 
-Некоторым операциям `adguardvpn-cli` требуются повышенные сетевые привилегии. Чтобы избежать постоянного ввода sudo пароля, есть несколько вариантов:
+Некоторым операциям `adguardvpn-cli` требуются повышенные сетевые привилегии. Чтобы избежать постоянного ввода sudo пароля, выполните настройку один раз:
 
-### Вариант 1: Использование Linux capabilities
+### Вариант 1: Автоматическая настройка sudoers (для этого проекта)
 
-Самый простой и безопасный способ. Даёт бинарному файлу точно те привилегии, которые ему нужны:
-
-```bash
-# Узнайте полный путь к бинарю
-which adguardvpn-cli (путь выданный по данной команде может быть symbolic link)
-
-# Дайте необходимые capabilities (замените путь на реальный)
-sudo setcap cap_net_admin,cap_net_raw+eip /usr/bin/adguardvpn-cli
-
-# Проверьте что capabilities установлены
-getcap /usr/bin/adguardvpn-cli
-# Результат: /usr/bin/adguardvpn-cli = cap_net_admin,cap_net_raw+eip
-```
-
-**Удаление capabilities (если требуется обратно):**
+Проект содержит скрипт `setup_sudoers.sh`, который автоматически добавляет правило в `/etc/sudoers.d/`, разрешающее запуск `adguardvpn-cli connect` и `adguardvpn-cli disconnect` без ввода пароля:
 
 ```bash
-sudo setcap -r /usr/bin/adguardvpn-cli
+chmod +x setup_sudoers.sh
+./setup_sudoers.sh
 ```
 
-### Вариант 2: Использование systemd сервиса
+Скрипт автоматически определяет путь к `adguardvpn-cli` и вашу группу sudo, создаёт файл `/etc/sudoers.d/adguardvpn-cli-nopasswd` и проверяет синтаксис через `visudo -c`.
 
-Более сложный, но универсальный способ для продвинутых пользователей. Запустите `adguardvpn-cli` как systemd сервис с правами root и управляйте им через `systemctl`.
+**Удаление правила:**
+
+```bash
+sudo rm /etc/sudoers.d/adguardvpn-cli-nopasswd
+```
+
+### Ручная настройка через visudo
+
+Если вы не хотите использовать скрипт, можете добавить правило вручную:
+
+```bash
+sudo visudo -f /etc/sudoers.d/adguardvpn-cli-nopasswd
+```
+
+Добавьте строку (замените `%sudo` на вашу группу и путь к `adguardvpn-cli` на актуальный):
+
+```sudoers
+%sudo ALL=(ALL) NOPASSWD: /usr/bin/adguardvpn-cli connect *, /usr/bin/adguardvpn-cli disconnect *
+```
+
+После сохранения проверьте синтаксис:
+
+```bash
+sudo visudo -c
+```
 
 ## Примеры использования
 
