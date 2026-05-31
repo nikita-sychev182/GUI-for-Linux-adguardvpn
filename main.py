@@ -9,6 +9,18 @@ def run_cmd(cmd_args, timeout=30):
     try:
         proc = subprocess.run(cmd_args, stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE, text=True, timeout=timeout)
+        if proc.returncode == 0:
+            return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
+        stderr_lower = proc.stderr.strip().lower()
+        is_privileged = (
+            len(cmd_args) > 1 and cmd_args[1] in ('connect', 'disconnect')
+        )
+        if is_privileged and 'sudo' not in [a.lower() for a in cmd_args]:
+            sudo_cmd = ['sudo', '-E'] + cmd_args
+            proc2 = subprocess.run(sudo_cmd, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, text=True, timeout=timeout)
+            if proc2.returncode == 0:
+                return proc2.returncode, proc2.stdout.strip(), proc2.stderr.strip()
         return proc.returncode, proc.stdout.strip(), proc.stderr.strip()
     except Exception as e:
         return 1, "", str(e)
